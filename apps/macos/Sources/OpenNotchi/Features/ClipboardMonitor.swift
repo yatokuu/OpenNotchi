@@ -9,6 +9,7 @@ struct ClipboardItem: Identifiable, Equatable {
     let id = UUID()
     let content: Content
     let date: Date
+    var screenshotURL: URL? = nil
 
     var text: String? {
         if case .text(let value) = content { return value }
@@ -21,12 +22,14 @@ struct ClipboardItem: Identifiable, Equatable {
 final class ClipboardMonitor: ObservableObject {
     @Published private(set) var items: [ClipboardItem] = []
 
-    private let maxItems = 40
+    private let maxItems = 15
     private let storageKey = "clipboardHistory"
     private let settings: AppSettings
     private let pasteboard = NSPasteboard.general
     private var changeCount: Int
     private var timer: Timer?
+    private var lastScreenshotScan = Date.distantPast
+    private var knownScreenshots = Set<URL>()
 
     /// Types password managers set to ask clipboard tools not to record the copy.
     private let ignoredTypes: Set<String> = [
@@ -42,8 +45,36 @@ final class ClipboardMonitor: ObservableObject {
         let saved = UserDefaults.standard.stringArray(forKey: storageKey) ?? []
         items = saved.map { ClipboardItem(content: .text($0), date: .distantPast) }
 
+        // Include screenshots saved by macOS without changing the user's clipboard.
+        scanScreenshots()
+
         timer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { [weak self] _ in
             self?.poll()
+            if let self, Date().timeIntervalSince(self.lastScreenshotScan) > 3 {
+                self.scanScreenshots()
+            }
+        }
+    }
+
+    private func scanScreenshots() {
+        lastScreenshotScan = Date()
+        let configured = UserDefaults.standard.persistentDomain(forName: "com.apple.screencapture")?["location"] as? String
+        let folder = URL(fileURLWithPath: ((configured ?? "~/Desktop") as NSString).expandingTildeInPath, isDirectory: true)
+        guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]) else { return }
+        let candidates = files.filter {
+            let name = $0.lastPathComponent.lowercased()
+            return (name.hasPrefix("screenshot") || name.hasPrefix("screen shot")) && ["png", "jpg", "jpeg", "heic"].contains($0.pathExtension.lowercased())
+        }.sorted {
+            let a = (try? $0.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            let b = (try? $1.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            return a > b
+        }
+        let newest = Array(candidates.prefix(maxItems))
+        for url in newest.reversed() where !knownScreenshots.contains(url) {
+            knownScreenshots.insert(url)
+            guard let image = NSImage(contentsOf: url) else { continue }
+            let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date()
+            insert(ClipboardItem(content: .image(image), date: date, screenshotURL: url))
         }
     }
 
@@ -64,6 +95,7 @@ final class ClipboardMonitor: ObservableObject {
     }
 
     private func insert(_ item: ClipboardItem) {
+        if let url = item.screenshotURL { items.removeAll { $0.screenshotURL == url } }
         if let text = item.text {
             items.removeAll { $0.text == text }
         }

@@ -159,53 +159,18 @@ struct FeaturesPane: View {
                         isOn: $settings.timerTabEnabled
                     )
                     FeatureModuleCard(
-                        title: "Camera Mirror & Studio",
-                        subtitle: "1080p mirror, gestures & Photobox strip",
-                        icon: "camera.fill",
-                        tint: .teal,
-                        isOn: $settings.mirrorTabEnabled
-                    )
-                    FeatureModuleCard(
-                        title: "Developer Tools",
-                        subtitle: "Ports, CI builds, eyedropper & mic hub",
-                        icon: "terminal.fill",
-                        tint: .indigo,
-                        isOn: $settings.devToolsEnabled
-                    )
-                    FeatureModuleCard(
-                        title: "Smarthome Hub",
-                        subtitle: "AC climate dial, lamps & quick scenes",
-                        icon: "air.conditioner.horizontal.fill",
-                        tint: .green,
-                        isOn: $settings.smarthomeEnabled
-                    )
-                    FeatureModuleCard(
-                        title: "Markets Watchlist",
-                        subtitle: "IDX, US stocks, crypto & forex quotes",
-                        icon: "chart.line.uptrend.xyaxis",
-                        tint: .mint,
-                        isOn: $settings.marketsEnabled
-                    )
-                    FeatureModuleCard(
                         title: "Notes & Keep Awake",
                         subtitle: "Quick scratchpad, caffeine & Shortcuts",
                         icon: "note.text",
                         tint: .yellow,
                         isOn: $settings.notesTabEnabled
                     )
-                    FeatureModuleCard(
-                        title: "Smart Calculator",
-                        subtitle: "Math, % & live currency conversion",
-                        icon: "plusminus.circle.fill",
-                        tint: .orange,
-                        isOn: $settings.calcTabEnabled
-                    )
                 }
 
                 HStack(spacing: 8) {
                     Image(systemName: "info.circle")
                         .foregroundStyle(.secondary)
-                    Text("Home and File Tray (AirDrop & Instant OCR) are always enabled as core tabs.")
+                    Text("Home provides music controls. These are the only tabs in this build.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -425,9 +390,6 @@ struct FeaturesPane: View {
                 PrayerSettings()
             }
 
-            Section("Markets & Tickers") {
-                MarketSettings()
-            }
         }
     }
 
@@ -436,12 +398,7 @@ struct FeaturesPane: View {
         settings.prompterTabEnabled = enabled
         settings.clipboardEnabled = enabled
         settings.timerTabEnabled = enabled
-        settings.mirrorTabEnabled = enabled
-        settings.devToolsEnabled = enabled
-        settings.smarthomeEnabled = enabled
-        settings.marketsEnabled = enabled
         settings.notesTabEnabled = enabled
-        settings.calcTabEnabled = enabled
     }
 }
 

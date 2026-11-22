@@ -32,7 +32,7 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
         let key = info["SUPublicEDKey"] as? String ?? ""
         isAvailable = !feed.isEmpty && !key.isEmpty
 
-        automaticallyChecks = true
+        automaticallyChecks = false
         super.init()
 
         if isAvailable {
@@ -47,13 +47,9 @@ final class Updater: NSObject, ObservableObject, SPUUpdaterDelegate {
             canCheckForUpdates = true
         }
 
-        // Check for updates in the background on startup (after 5s) and periodically every 6 hours
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
-            self?.checkGitHubReleasesSilently()
-        }
-        checkTimer = Timer.scheduledTimer(withTimeInterval: 6 * 3600, repeats: true) { [weak self] _ in
-            self?.checkGitHubReleasesSilently()
-        }
+        // This is a customized local build; automatic upstream updates would
+        // replace its Firefox integration and six-tab layout.
+        controller?.updater.automaticallyChecksForUpdates = false
     }
 
     func checkForUpdates() {

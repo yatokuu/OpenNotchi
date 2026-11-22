@@ -84,7 +84,7 @@ private struct ClipboardRow: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 18, height: 18)
                         .clipShape(RoundedRectangle(cornerRadius: 3))
-                    Text("Image")
+                    Text(item.screenshotURL == nil ? "Image" : "Screenshot")
                         .foregroundStyle(.secondary)
                 }
 

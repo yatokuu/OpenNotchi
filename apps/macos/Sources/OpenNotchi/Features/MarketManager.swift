@@ -80,6 +80,7 @@ final class MarketManager: ObservableObject {
 
     init(settings: AppSettings) {
         self.settings = settings
+        guard settings.marketsEnabled || settings.showTickerInHeader else { return }
         settings.$marketTickers
             .removeDuplicates()
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)

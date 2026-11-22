@@ -92,7 +92,6 @@ struct HeaderView: View {
     }
 
     private func moreTabsGridPopover(visibleTabs: [NotchTab]) -> some View {
-        let disabledTabs = NotchTab.allCases.filter { !settings.isTabEnabled($0) }
         return VStack(alignment: .leading, spacing: 10) {
             Button {
                 showMoreTabsPopover = false
@@ -165,37 +164,6 @@ struct HeaderView: View {
                 }
             }
 
-            if !disabledTabs.isEmpty {
-                Divider()
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Hidden Tabs (click to enable)")
-                        .font(.system(size: 9.5, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 5) {
-                        ForEach(disabledTabs, id: \.self) { tab in
-                            Button {
-                                settings.setTabEnabled(tab, true)
-                                showMoreTabsPopover = false
-                                vm.selectTab(tab)
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: tab.icon)
-                                        .font(.system(size: 10))
-                                    Text(tab.rawValue)
-                                        .font(.system(size: 10, weight: .medium))
-                                        .lineLimit(1)
-                                }
-                                .foregroundStyle(.secondary)
-                                .padding(.vertical, 5)
-                                .padding(.horizontal, 6)
-                                .frame(maxWidth: .infinity)
-                                .background(RoundedRectangle(cornerRadius: 7).fill(Color.primary.opacity(0.04)))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
         }
         .padding(12)
         .frame(width: 280)
@@ -264,15 +232,10 @@ struct HeaderView: View {
                 }
                 Menu("Visible Tabs") {
                     Toggle("AI (Quota & Agents)", isOn: $settings.aiEnabled)
-                    Toggle("Smarthome", isOn: $settings.smarthomeEnabled)
                     Toggle("Prompter", isOn: $settings.prompterTabEnabled)
                     Toggle("Clipboard", isOn: $settings.clipboardEnabled)
                     Toggle("Timer", isOn: $settings.timerTabEnabled)
-                    Toggle("Mirror", isOn: $settings.mirrorTabEnabled)
-                    Toggle("Markets", isOn: $settings.marketsEnabled)
-                    Toggle("Dev Tools", isOn: $settings.devToolsEnabled)
                     Toggle("Notes", isOn: $settings.notesTabEnabled)
-                    Toggle("Calculator", isOn: $settings.calcTabEnabled)
                 }
                 Toggle("Desktop Lyrics", isOn: $settings.lyricsOverlayEnabled)
                     .disabled(!settings.lyricsEnabled)

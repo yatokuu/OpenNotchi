@@ -12,9 +12,10 @@ final class MediaManager: ObservableObject {
     private let appleMusicProvider = AppleMusicProvider()
     private let spotifyProvider = SpotifyProvider()
     private let spotifyWebProvider = SpotifyWebProvider()
+    private let firefoxProvider = FirefoxMediaProvider()
 
     // Order matters: when several report the same state, the earlier one wins.
-    lazy var providers: [MediaProvider] = [appleMusicProvider, spotifyProvider] + BrowserYouTubeProvider.all + [spotifyWebProvider]
+    lazy var providers: [MediaProvider] = [appleMusicProvider, spotifyProvider, firefoxProvider] + BrowserYouTubeProvider.all + [spotifyWebProvider]
 
     private let settings: AppSettings
     private var timer: Timer?
@@ -26,7 +27,7 @@ final class MediaManager: ObservableObject {
     init(settings: AppSettings) {
         self.settings = settings
 
-        let allProviders: [MediaProvider] = [appleMusicProvider, spotifyProvider] + BrowserYouTubeProvider.all + [spotifyWebProvider]
+        let allProviders: [MediaProvider] = [appleMusicProvider, spotifyProvider, firefoxProvider] + BrowserYouTubeProvider.all + [spotifyWebProvider]
         for provider in allProviders {
             guard let name = provider.notificationName else { continue }
             DistributedNotificationCenter.default().addObserver(
@@ -130,9 +131,10 @@ final class MediaManager: ObservableObject {
         let enabledBrowsers: [MediaProvider] = BrowserYouTubeProvider.all.filter {
             settings.isProviderEnabled($0.id) && $0.isRunning
         }
+        let firefoxRunning = settings.firefoxEnabled && firefoxProvider.isRunning
         let webRunning = settings.isProviderEnabled(spotifyWebProvider.id) && spotifyWebProvider.isRunning
 
-        guard !enabledNative.isEmpty || !enabledBrowsers.isEmpty || webRunning else {
+        guard !enabledNative.isEmpty || !enabledBrowsers.isEmpty || firefoxRunning || webRunning else {
             apply([])
             return
         }
@@ -154,6 +156,9 @@ final class MediaManager: ObservableObject {
             // If a native player is already playing, skip browser tabs entirely to prevent hangs and lag
             let hasActiveNative = results.contains(where: \.isPlaying)
             if !hasActiveNative {
+                if firefoxRunning, let info = self.firefoxProvider.fetch() {
+                    results.append(info)
+                }
                 for browser in enabledBrowsers {
                     if let info = browser.fetch() {
                         results.append(info)

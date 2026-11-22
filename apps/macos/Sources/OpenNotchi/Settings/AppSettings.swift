@@ -85,6 +85,7 @@ final class AppSettings: ObservableObject {
         }
     }
     @Published var marketsEnabled: Bool { didSet { defaults.set(marketsEnabled, forKey: "marketsEnabled") } }
+    @Published var firefoxEnabled: Bool { didSet { defaults.set(firefoxEnabled, forKey: "firefoxEnabled") } }
     @Published var showTickerInHeader: Bool { didSet { defaults.set(showTickerInHeader, forKey: "showTickerInHeader") } }
     @Published var networkLiveActivity: Bool { didSet { defaults.set(networkLiveActivity, forKey: "networkLiveActivity") } }
     /// Notchi, the mascot, beside the closed notch when nothing else is showing.
@@ -323,9 +324,10 @@ final class AppSettings: ObservableObject {
             "hudEnabled": false,
             "weatherEnabled": true,
             "marketsEnabled": false,
-            "showTickerInHeader": true,
+            "firefoxEnabled": true,
+            "showTickerInHeader": false,
             "networkLiveActivity": true,
-            "showMascot": true,
+            "showMascot": false,
             "showStatsInHeader": true,
             "marketTickers": ["^JKSE", "BBCA.JK", "^GSPC", "AAPL", "BTC-USD", "IDR=X"],
             "useFahrenheit": Locale.current.measurementSystem == .us,
@@ -342,15 +344,15 @@ final class AppSettings: ObservableObject {
             "homeLyricsMode": false,
             "artworkStyle": PlayerArtworkStyle.vinylDisc.rawValue,
             "vinylModeEnabled": true,
-            "ambientAuraEnabled": true,
+            "ambientAuraEnabled": false,
             "theme": NotchTheme.defaultTheme.rawValue,
             "accent": AccentChoice.white.rawValue,
             "clipboardEnabled": true,
             "timerTabEnabled": false,
             "mirrorTabEnabled": false,
-            "devToolsEnabled": true,
+            "devToolsEnabled": false,
             "notesTabEnabled": true,
-            "calcTabEnabled": true,
+            "calcTabEnabled": false,
             "lyricsOverlayEnabled": false,
             "nowPlayingScreenEnabled": true,
             "nowPlayingScreenIdleMinutes": 2.0,
@@ -375,7 +377,7 @@ final class AppSettings: ObservableObject {
             "lyricsTranslateTarget": "id",
             "privacyPeekEnabled": true,
             "downloadPeekEnabled": true,
-            "smarthomeEnabled": true,
+            "smarthomeEnabled": false,
             "smarthomeProvider": SmarthomeProviderType.demo.rawValue,
             "homeAssistantURL": "http://homeassistant.local:8123",
             "homeAssistantToken": "",
@@ -467,6 +469,7 @@ final class AppSettings: ObservableObject {
         hudEnabled = defaults.bool(forKey: "hudEnabled")
         weatherEnabled = defaults.bool(forKey: "weatherEnabled")
         marketsEnabled = defaults.bool(forKey: "marketsEnabled")
+        firefoxEnabled = defaults.bool(forKey: "firefoxEnabled")
         showTickerInHeader = defaults.bool(forKey: "showTickerInHeader")
         networkLiveActivity = defaults.bool(forKey: "networkLiveActivity")
         showMascot = defaults.bool(forKey: "showMascot")
@@ -614,12 +617,13 @@ final class AppSettings: ObservableObject {
     }
 
     var visibleTabs: [NotchTab] {
-        NotchTab.allCases.filter(isTabEnabled)
+        [.home, .notes, .clipboard, .timer, .ai, .prompter].filter(isTabEnabled)
     }
 
     func isTabEnabled(_ tab: NotchTab) -> Bool {
         switch tab {
-        case .home, .tray: return true
+        case .home: return true
+        case .tray: return false
         case .prompter: return prompterTabEnabled
         case .clipboard: return clipboardEnabled
         case .timer: return timerTabEnabled

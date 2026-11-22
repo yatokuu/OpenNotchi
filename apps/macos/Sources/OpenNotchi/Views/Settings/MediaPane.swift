@@ -24,8 +24,7 @@ struct MediaPane: View {
             }
             Section("YouTube in your browser") {
                 Toggle("YouTube and YouTube Music", isOn: $settings.youtubeEnabled)
-                Toggle("Live video preview in the notch", isOn: $settings.videoPreviewEnabled)
-                    .disabled(!settings.youtubeEnabled)
+                Toggle("Firefox (macOS media controls)", isOn: $settings.firefoxEnabled)
                 if !media.browsersNeedingJavaScript.isEmpty {
                     Label(
                         "\(media.browsersNeedingJavaScript.joined(separator: ", ")) needs “Allow JavaScript from Apple Events” turned on.",
@@ -35,12 +34,12 @@ struct MediaPane: View {
                     .foregroundStyle(.orange)
                 }
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Works with Chrome, Brave, Edge, Arc and Safari. Turn on JavaScript from Apple Events once:")
+                    Text("Firefox uses macOS media controls; no JavaScript from Apple Events setting is needed. YouTube and YouTube Music playback in Firefox will appear here when Firefox publishes it to Control Center.")
+                    Text("Chrome, Brave, Edge, Arc and Safari need JavaScript from Apple Events turned on once:")
                     Text("• Chrome, Brave, Edge, Arc: View → Developer → Allow JavaScript from Apple Events")
                     Text(
                         "• Safari: Settings → Advanced → Show features for web developers, then Develop → Allow JavaScript from Apple Events"
                     )
-                    Text("The preview is a muted copy of the video that only loads while the notch is open.")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
