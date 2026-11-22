@@ -35,6 +35,7 @@ struct MediaPane: View {
                 }
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Firefox uses macOS media controls; no JavaScript from Apple Events setting is needed. YouTube and YouTube Music playback in Firefox will appear here when Firefox publishes it to Control Center.")
+                    Text("Next and Previous in Firefox use YouTube keyboard shortcuts and need Accessibility access for OpenNotchi. macOS will ask when you first use them.")
                     Text("Chrome, Brave, Edge, Arc and Safari need JavaScript from Apple Events turned on once:")
                     Text("• Chrome, Brave, Edge, Arc: View → Developer → Allow JavaScript from Apple Events")
                     Text(

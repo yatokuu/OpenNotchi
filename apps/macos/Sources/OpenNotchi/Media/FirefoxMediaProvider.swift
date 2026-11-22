@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 
 /// Reads Firefox's macOS media session. Firefox does not support injecting
 /// JavaScript through Apple Events, so this uses the local media-control helper.
@@ -70,7 +71,25 @@ final class FirefoxMediaProvider: MediaProvider {
         _ = call([name] + (value.map { [$0] } ?? []))
     }
     func playPause() { command("toggle-play-pause") }
-    func nextTrack() { command("next-track") }
-    func previousTrack() { command("previous-track") }
+    /// Firefox exposes playback metadata to macOS, but YouTube does not always
+    /// implement the system's next/previous commands. Use YouTube's documented
+    /// shortcuts for the active Firefox tab instead.
+    private func youtubeShortcut(_ keyCode: CGKeyCode) {
+        guard let pid = NSRunningApplication.runningApplications(withBundleIdentifier: id).first?.processIdentifier else { return }
+        guard AXIsProcessTrusted() else {
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+            _ = AXIsProcessTrustedWithOptions(options)
+            return
+        }
+        let source = CGEventSource(stateID: .hidSystemState)
+        let down = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
+        let up = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
+        down?.flags = .maskShift
+        up?.flags = .maskShift
+        down?.postToPid(pid)
+        up?.postToPid(pid)
+    }
+    func nextTrack() { youtubeShortcut(45) } // Shift+N
+    func previousTrack() { youtubeShortcut(35) } // Shift+P
     func seek(to seconds: Double) { command("seek", String(seconds)) }
 }

@@ -6,6 +6,7 @@ This local build is based on [OpenNotchi](https://github.com/nannndev/OpenNotchi
 - It also reads recent macOS screenshot files from the folder set in `com.apple.screencapture location` (or Desktop by default) and labels them **Screenshot**. It does not change the clipboard or record the screen.
 - Notes and Timer tabs are enabled. The note from the previous Notchy installation was imported into OpenNotchi's local `notes.json`.
 - Firefox YouTube playback uses the local `media-control` helper and the macOS media session. Firefox has no **Allow JavaScript from Apple Events** switch. Other supported browsers still use their Apple Events JavaScript integration.
+- Firefox's system media session sometimes ignores Next and Previous. This build uses YouTube's Shift+N and Shift+P shortcuts for those buttons; macOS Accessibility access is needed for OpenNotchi to send them to Firefox.
 - Install the helper with `brew install media-control` if this build is moved to another Mac. Firefox can be turned on or off in Settings → Media.
 - The visible tabs are Home (music), Notes, Clipboard, Timer, AI, and Prompter.
 - Markets and tickers, stats, weather, video preview, mascot animation, and the idle now-playing screen were disabled to reduce background work.
