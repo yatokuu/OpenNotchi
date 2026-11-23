@@ -8,6 +8,8 @@ struct NotesView: View {
     @Environment(\.notchAccent) private var accent
     @State private var shortcuts: [String] = []
     @State private var query = ""
+    @State private var draftText = ""
+    @State private var editingNoteID: UUID?
     @FocusState private var editorFocused: Bool
 
     var body: some View {
@@ -134,10 +136,16 @@ struct NotesView: View {
     @ViewBuilder
     private var editor: some View {
         if let note = store.current {
-            TextEditor(text: Binding(get: { note.text }, set: { store.update(note.id, text: $0) }))
+            TextEditor(text: $draftText)
                 .font(.system(size: 12.5, design: .rounded))
                 .scrollContentBackground(.hidden)
                 .focused($editorFocused)
+                .onAppear { loadCurrentNote() }
+                .onChange(of: store.currentID) { _, _ in loadCurrentNote() }
+                .onChange(of: draftText) { _, text in
+                    guard let editingNoteID else { return }
+                    store.update(editingNoteID, text: text)
+                }
                 .padding(8)
                 .background(RoundedRectangle(cornerRadius: 12).fill(.white.opacity(0.06)))
                 .overlay(alignment: .topLeading) {
@@ -178,6 +186,11 @@ struct NotesView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
         }
+    }
+
+    private func loadCurrentNote() {
+        editingNoteID = store.currentID
+        draftText = store.current?.text ?? ""
     }
 
     private var awakeLabel: String {
